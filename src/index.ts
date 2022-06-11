@@ -1,7 +1,7 @@
 import express from "express"
 import cors from "cors"
 import * as http from "http"
-import { Server } from "socket.io"
+import { Server, Socket } from "socket.io"
 
 const app = express()
 const server = http.createServer(app)
@@ -18,6 +18,10 @@ const io = new Server(server, {
 
 io.on("connection", (socket) => {
     console.log("Conectado")
+
+    socket.on("send-message", (data) => {
+        console.log(data)
+    })
 })
 
 server.listen(PORT, () => {
