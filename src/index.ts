@@ -19,7 +19,7 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
     console.log("Conectado")
 
-    socket.on("send-message", (data) => {
+    socket.on("newMove", (data) => {
         console.log(data)
     })
 })
