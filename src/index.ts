@@ -16,6 +16,10 @@ const io = new Server(server, {
     }
 })
 
+io.on("connection", (socket) => {
+    console.log("Conectado")
+})
+
 server.listen(PORT, () => {
     console.log("ON Porta " + PORT)
 })
