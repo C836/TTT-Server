@@ -17,10 +17,12 @@ const io = new Server(server, {
 })
 
 io.on("connection", (socket) => {
-    console.log("Conectado")
+    socket.on("join_room", (data) => {
+        socket.join(data)
+    })
 
-    socket.on("newMove", (data) => {
-        console.log(data)
+    socket.on("send_position", (data) => {
+        socket.to(data.room).emit("receive_position", data)
     })
 })
 
