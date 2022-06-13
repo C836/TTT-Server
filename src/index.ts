@@ -6,6 +6,7 @@ import { Server, Socket } from "socket.io";
 import rooms from "./actions/rooms.js";
 
 import { generate_id } from "./utils/generate_id.js";
+import game from "./actions/game.js";
 
 const app = express();
 const server = http.createServer(app);
@@ -21,7 +22,8 @@ const io = new Server(server, {
 });
 
 io.on("connection", (socket) => {
-  rooms(socket)
+  rooms(socket, io)
+  game(socket, io)
 });
 
 server.listen(PORT, () => {

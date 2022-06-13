@@ -1,6 +1,6 @@
 import { generate_id } from "../utils/generate_id.js";
 
-export default function rooms(socket) {
+export default function rooms(socket, io) {
   socket.on("create_room", () => {
     const room = generate_id();
 
@@ -23,14 +23,18 @@ export default function rooms(socket) {
         status: "joined",
         key: data,
       },
+
+      starting: {
+        status: "starting"
+      }
     };
 
     socket.join(data);
     socket.emit("room_status", response.peer);
     socket.to(data).emit("room_status", response.master);
-  });
 
-  socket.on("send_position", (data) => {
-    socket.to(data.room).emit("receive_position", data);
+    setTimeout(() => {
+        io.in(data).emit("room_status", response.starting);
+    }, 3000);
   });
 }
