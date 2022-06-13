@@ -3,6 +3,8 @@ import cors from "cors";
 import * as http from "http";
 import { Server, Socket } from "socket.io";
 
+import rooms from "./actions/rooms.js";
+
 import { generate_id } from "./utils/generate_id.js";
 
 const app = express();
@@ -19,40 +21,7 @@ const io = new Server(server, {
 });
 
 io.on("connection", (socket) => {
-  socket.on("create_room", () => {
-    const room = generate_id();
-
-    const response = {
-      status: "created",
-      key: room,
-    };
-
-    socket.join(room);
-    socket.emit("room_status", response);
-  });
-
-  socket.on("join_room", async (data) => {
-    const connected_users = await io.in(data).allSockets();
-
-    const response = {
-        master: {
-            status: "joined_peer"
-        },
-
-        peer: {
-            status: "joined",
-            key: data
-        }
-    }
-
-    socket.join(data);
-    socket.emit("room_status", response.peer);
-    socket.to(data).emit("room_status", response.master);
-  });
-
-  socket.on("send_position", (data) => {
-    socket.to(data.room).emit("receive_position", data);
-  });
+  rooms(socket)
 });
 
 server.listen(PORT, () => {
