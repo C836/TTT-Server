@@ -26,14 +26,28 @@ io.on("connection", (socket) => {
       status: "created",
       key: room,
     };
-    
+
     socket.join(room);
     socket.emit("room_status", response);
   });
 
   socket.on("join_room", async (data) => {
     const connected_users = await io.in(data).allSockets();
+
+    const response = {
+        master: {
+            status: "joined_peer"
+        },
+
+        peer: {
+            status: "joined",
+            key: data
+        }
+    }
+
     socket.join(data);
+    socket.emit("room_status", response.peer);
+    socket.to(data).emit("room_status", response.master);
   });
 
   socket.on("send_position", (data) => {
