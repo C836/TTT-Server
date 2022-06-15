@@ -25,4 +25,12 @@ export default function game(socket, io) {
       io.in(data.room).emit("win", { winner: socket.id });
     })
   });
+
+  socket.on("reset", (data)=> {
+    let state = Array(9).fill("")
+    movements = []
+
+    console.log(data)
+    io.in(data.room).emit("reset", data.winners, state);
+  })
 }
