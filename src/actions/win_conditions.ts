@@ -1,17 +1,17 @@
 interface Data {
-  pattern?: number[][];
-  movements?: number[];
+  pattern: number[][];
+  movements: number[];
 }
 
-export function verify(data: Data, callback: { (win: boolean): void}) {
+export function verify(data: Data, callback: { (win: boolean): void }) {
   const pattern = data.pattern;
   const movements = data.movements;
 
   pattern.forEach((array) => {
-    if(array.every((arra) => movements.includes(arra))){
-      callback(true)
+    if (array.every((arra) => movements.includes(arra))) {
+      callback(true);
     }
-  }) 
+  });
 }
 
 export const pattern_3x3 = [
