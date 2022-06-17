@@ -35,8 +35,6 @@ export default function rooms({socket, io}: Socket_Config) {
     socket.emit("room_status", response.peer);
     socket.to(data).emit("room_status", response.master);
 
-    setTimeout(() => {
-        io.in(data).emit("room_status", response.starting);
-    }, 3000);
+    io.in(data).emit("room_status", response.starting);
   });
 }
