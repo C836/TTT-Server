@@ -1,36 +1,62 @@
-import { verify, pattern_3x3, pattern_4x4 } from "./win_conditions.js"
+import { Server, Socket } from "socket.io";
+import { choose_player } from "../utils/choose_players.js";
+import { verify, pattern_3x3, pattern_4x4 } from "./win_conditions.js";
 
-export default function game(socket, io) {
-  let movements = []
-  let board = Array(9).fill("")
+const EMPTY_BOARD = Array(9).fill("");
 
-  socket.on("choose_player", async (data) => {
-    const sockets = await io.in(data.room).allSockets();
-    const connected_users = Array.from(sockets);
-    const selected = connected_users[Math.round(Math.random())];
+export interface Socket_Config{
+  socket: Socket,
+  io: Server
+}
 
-    io.in(data.room).emit("start_player", { selected: selected, board: board });
+export default function game({socket, io}:Socket_Config) {
+  let movements:number[] = [];
+  let board = EMPTY_BOARD;
+
+  socket.on("choose_player", async (room) => {
+    const selected = await choose_player(room);
+
+    const response = {
+      board: board,
+      selected: selected
+    };
+
+    io.in(room).emit("start_player", response);
   });
 
   socket.on("send_position", (data) => {
-    let state = data.board
-    state[data.position] = data.signal
+    let state = data.board;
+    state[data.position] = data.signal;
 
-    io.in(data.room).emit("receive_position", socket.id, state);
+    const response = {
+      id: socket.id,
+      board: state,
+    };
 
-    movements.push(data.position)
-    let pattern = pattern_3x3
+    io.in(data.room).emit("receive_position", response);
 
-    verify({pattern, movements}, (win) => {
-      io.in(data.room).emit("win", { winner: socket.id });
-    })
+    movements.push(data.position);
+    let pattern = pattern_3x3;
+
+    verify({ pattern, movements }, () => {
+      const response = {
+        winner: socket.id
+      }
+
+      io.in(data.room).emit("win", response);
+    });
   });
 
-  socket.on("reset", (data)=> {
-    let state = Array(9).fill("")
-    movements = []
+  socket.on("reset", (data) => {
+    const { room, winners } = data
+    let state = Array(9).fill("");
+    movements = [];
 
-    console.log(data)
-    io.in(data.room).emit("reset", data.winners, state);
-  })
+    const response = {
+      winners: winners,
+      board: state
+    }
+
+    io.in(room).emit("reset", response);
+  });
 }

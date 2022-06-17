@@ -1,6 +1,8 @@
 import { generate_id } from "../utils/generate_id.js";
 
-export default function rooms(socket, io) {
+import { Socket_Config } from "./game.js";
+
+export default function rooms({socket, io}: Socket_Config) {
   socket.on("create_room", () => {
     const room = generate_id();
 
