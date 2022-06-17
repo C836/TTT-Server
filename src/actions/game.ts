@@ -25,17 +25,18 @@ export default function game({socket, io}:Socket_Config) {
   });
 
   socket.on("send_position", (data) => {
-    let state = data.board;
-    state[data.position] = data.signal;
+    const { room, position, board, signal } = data
+    let state = board;
+    state[position] = signal;
 
     const response = {
       id: socket.id,
       board: state,
     };
 
-    io.in(data.room).emit("receive_position", response);
+    io.in(room).emit("receive_position", response);
 
-    movements.push(data.position);
+    movements.push(position);
     let pattern = pattern_3x3;
 
     verify({ pattern, movements }, () => {
@@ -43,14 +44,15 @@ export default function game({socket, io}:Socket_Config) {
         winner: socket.id
       }
 
-      io.in(data.room).emit("win", response);
+      io.in(room).emit("win", response);
     });
   });
 
   socket.on("reset", (data) => {
     const { room, winners } = data
     let state = Array(9).fill("");
-    movements = [];
+
+    movements = []
 
     const response = {
       winners: winners,
@@ -58,5 +60,10 @@ export default function game({socket, io}:Socket_Config) {
     }
 
     io.in(room).emit("reset", response);
+    io.in(room).emit("reset_movements");
   });
+
+  socket.on("reset_movements", () => {
+    movements = []
+  })
 }
